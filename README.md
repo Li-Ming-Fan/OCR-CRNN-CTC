@@ -13,6 +13,6 @@ https://arxiv.org/abs/1507.05717
 
 ## 
 
-A modification from https://github.com/weinman/cnn_lstm_ctc_ocr
+A modification based on https://github.com/weinman/cnn_lstm_ctc_ocr
 
 
