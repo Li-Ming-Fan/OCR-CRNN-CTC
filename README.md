@@ -13,7 +13,7 @@ Baoguang Shi, Xiang Bai, Cong Yao
   
 https://arxiv.org/abs/1507.05717
 
-## acknowledgement
+## Acknowledgement
 
 We crafted this repo based on https://github.com/weinman/cnn_lstm_ctc_ocr
 
