@@ -19,7 +19,7 @@ dir_contents = dir_data + '/contents'
 #
 alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 alphabet += ''' ,./<>?;':"[]\{}|-=_+~!@#$%^&*()
-            '''
+            '''.strip()
 #
 alphabet_blank = '`'
 #
