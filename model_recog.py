@@ -335,8 +335,8 @@ def rnn_recog_layers(features, sequence_length, num_classes):
         #
         rnn_sequence = tf.transpose(features, perm = [1, 0, 2], name = 'time_major')
         #
-        rnn1 = rnn_layer(rnn_sequence, sequence_length, rnn_size, 'bdrnn1')
-        rnn2 = rnn_layer(rnn1, sequence_length, rnn_size, 'bdrnn2')
+        rnn1 = gru_layer(rnn_sequence, sequence_length, rnn_size, 'bdrnn1')
+        rnn2 = gru_layer(rnn1, sequence_length, rnn_size, 'bdrnn2')
         #
         rnn_logits = tf.layers.dense(rnn2, num_classes,
                                      activation = logit_activation,
