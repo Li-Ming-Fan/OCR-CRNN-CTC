@@ -1,4 +1,6 @@
-# OCR-CNN-LSTM-CTC
+# OCR-CRNN-CTC
+
+cnn + lstm/gru + ctc (CRNN) for image text recognition
 
 
 ## recognition model
