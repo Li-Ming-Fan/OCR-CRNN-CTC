@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 30 10:22:44 2017
+
+@author: mingfan.li
+"""
 
 import os
 
@@ -15,6 +20,26 @@ dir_images = dir_data + '/images'
 dir_contents = dir_data + '/contents'
 #
 '''
+
+#
+alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+alphabet += ''' ,./<>?;':"[]\{}|-=_+~!@#$%^&*()
+            '''
+#
+alphabet_blank = '`'
+#
+#
+def define_alphabet():
+    #
+    pass
+#
+def mapChar2Order(char): return alphabet.index(char)
+def mapOrder2Char(order):
+    if order == len(alphabet):
+        return alphabet_blank
+    else:
+        return alphabet[order]
+#
 
 #
 def getTargetTxtFile(img_file):
@@ -66,6 +91,8 @@ def getListContents(content_file):
 #
 def getDataBatch(img_file, height_norm, batch_dir = './data_batch'):
     #
+    if not os.path.exists(batch_dir): os.mkdir(batch_dir)
+    #
     txt_file = getTargetTxtFile(img_file)
     content_list = getListContents(txt_file)
     #
@@ -83,7 +110,7 @@ def getDataBatch(img_file, height_norm, batch_dir = './data_batch'):
     chosen = random.choice(range(len(content_list)))
     #
     # labels
-    list_chars = list(map(lambda x: ord(x)-97, content_list[chosen][1]))
+    list_chars = list(map(mapChar2Order, content_list[chosen][1]))
     labels.append(list_chars)
     #
     # images
@@ -191,7 +218,7 @@ def transResultsRNN(results):
         str_seq = ''
         for idy, item in enumerate(seq):
             #
-            str_seq += chr(np.argmax(item) + 97)
+            str_seq += mapOrder2Char(np.argmax(item))
             #
             #print(item)
             #
@@ -202,16 +229,4 @@ def transResultsRNN(results):
     #
 
 
-#
-#file_list = getFilesInDirect('./data_test/images', '.PNG')
-#texts, images, width, batch = getDataBatch(file_list[0], 32)
 
-
-#print(texts)
-#print(list_content.shape)
-#print(len(list_content))
-
-#print('images')
-#print(images.shape)
-#print(width)
-#print(batch)

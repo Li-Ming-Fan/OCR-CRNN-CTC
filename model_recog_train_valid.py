@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Tue Oct  3 12:50:37 2017
+
+@author: mingfan.li
+"""
 
 import os
 import shutil 
@@ -21,7 +26,7 @@ dir_data = './data_generated'
 dir_images = dir_data + '/images'
 dir_contents = dir_data + '/contents'
 #
-str_dot_img_ext = '.PNG'
+str_dot_img_ext = '.png'
 #
 # data for test
 dir_data_valid = './data_test'
@@ -33,12 +38,12 @@ dir_results = dir_data_valid + '/results'
 
 #
 #
-model_dir = './model'
+model_dir = './model_recog'
 model_name = 'model_recog'
 #
-num_classes = 27  #
+num_classes = 1 + len(model_recog_data.alphabet)
 #
-height_norm = 32
+height_norm = 32 # 
 #
 
 #
@@ -64,7 +69,7 @@ result_logits = model_recog.rnn_recog_layers(features, sequence_length, num_clas
 loss = model_recog.ctc_loss_layer(yT, result_logits, sequence_length)
 #
 # train-related
-global_step = tf.contrib.framework.get_or_create_global_step()
+global_step = tf.train.get_or_create_global_step()
 #
 # Update batch norm stats [http://stackoverflow.com/questions/43234667]
 extra_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -84,7 +89,7 @@ with tf.control_dependencies(extra_update_ops):
                                                optimizer = optimizer)
                                                #variables = rnn_vars)
 #
-print('graph loaded')
+print('graph defined')
 #
 # get training images
 list_images = model_recog_data.getFilesInDirect(dir_images, str_dot_img_ext)
@@ -185,6 +190,12 @@ with tf.Session() as sess:
                 curr += 1
                 print('curr: %d / %d, loss: %f' % (curr, NumImages, loss_value))
                 #
+                
+                print(results)
+                
+
+                
+                #
                 trans = model_recog_data.transResultsRNN(results)
                 #
                 #print(trans)
@@ -194,7 +205,11 @@ with tf.Session() as sess:
                 result_file = os.path.join(dir_results, str(step) + '_' + arr_str[0] + '.txt')
                 #
                 with open(result_file, 'w') as fp:
-                    for seq in trans: fp.write(seq+'\n')
+                    for label in targets:
+                        seq = list(map(model_recog_data.mapOrder2Char, label))
+                        print(''.join(seq))
+                        fp.write(''.join(seq) + '\n')
+                    for seq in trans: fp.write(seq + '\n')
                 # image
                 r = Image.fromarray(images[0][:,:,0] *255).convert('L')
                 g = Image.fromarray(images[0][:,:,1] *255).convert('L')

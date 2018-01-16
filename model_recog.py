@@ -79,6 +79,52 @@ def averpool_layer(inputs, size, stride, padding, name):
                                    padding = padding,
                                    name = name)
 #
+# tf.pad(tensor, paddings, mode='CONSTANT', name=None)
+#
+# 't' is [[1, 2, 3], [4, 5, 6]].
+# 'paddings' is [[1, 1,], [2, 2]].
+# rank of 't' is 2.
+#
+def pad_layer(tensor, paddings, mode='CONSTANT', name=None):
+    ''' define padding layer '''
+    return tf.pad(tensor, paddings, mode, name)
+#
+#
+def block_resnet(inputs, layer_params, training, name):
+    '''define resnet block'''
+    #    
+    shape_in = inputs.get_shape().as_list()
+    #
+    short_cut = inputs   # 1，图像大小不缩小，深度不加深
+    #                    # 2，图像大小只能降，1/2, 1/3, 1/4, ...
+    #                    # 3，深度，卷积修改
+    #
+    with tf.variable_scope(name):
+        #
+        for item in layer_params:
+            inputs = conv_layer(inputs, item, training)
+        #
+        shape_out = inputs.get_shape().as_list()
+        #
+        # 图片大小，缩小
+        if shape_in[1] != shape_out[1] or shape_in[2] != shape_out[2]:
+            #
+            size = [shape_in[1]//shape_out[1], shape_in[2]//shape_out[2]]
+            #
+            short_cut = maxpool_layer(short_cut, size, size, 'valid', 'shortcut_pool')
+            #
+        #
+        # 深度
+        if shape_in[3] != shape_out[3]:
+            #
+            item = [shape_out[3], 1, (1,1), 'same', 'shortcut_conv', False]
+            #
+            short_cut = conv_layer(short_cut, item, training)
+            #
+        #
+        outputs = tf.nn.relu(inputs + short_cut, 'last_relu')                
+    #    
+    return outputs
 #
 def bottleneck_block(inputs, depth_arr, name):
     '''define bottleneck block'''
@@ -144,12 +190,11 @@ def bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs,
 output_state_fw和output_state_bw的类型为LSTMStateTuple。
 LSTMStateTuple由（c，h）组成，分别代表memory cell和hidden state。
 '''
-def rnn_layer(bottom_sequence, sequence_length, rnn_size, scope):
-    """build bidirectional (concatenated output) lstm layer"""
-
+def rnn_layer(input_sequence, sequence_length, rnn_size, scope):
+    '''build bidirectional (concatenated output) lstm layer'''
+    #
     weight_initializer = tf.truncated_normal_initializer(stddev = 0.01)
-    
-    # Default activation is tanh
+    #
     cell_fw = tf.contrib.rnn.LSTMCell(rnn_size, initializer = weight_initializer)
     cell_bw = tf.contrib.rnn.LSTMCell(rnn_size, initializer = weight_initializer)
     #
@@ -159,88 +204,113 @@ def rnn_layer(bottom_sequence, sequence_length, rnn_size, scope):
     #cell_bw = tf.contrib.rnn.DropoutWrapper( cell_bw, 
     #                                         input_keep_prob=dropout_rate )
     
-    rnn_output,_ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, bottom_sequence,
-                                                   sequence_length = sequence_length,
-                                                   time_major = True,
-                                                   dtype = tf.float32,
-                                                   scope = scope)
+    rnn_output, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, input_sequence,
+                                                    sequence_length = sequence_length,
+                                                    time_major = True,
+                                                    dtype = tf.float32,
+                                                    scope = scope)
     
     # Concatenation allows a single output op because [A B]*[x;y] = Ax+By
     # [ paddedSeqLen batchSize 2*rnn_size]
     rnn_output_stack = tf.concat(rnn_output, 2, name = 'output_stack')
+    #rnn_output_stack = rnn_output[0] + rnn_output[1]
     
     return rnn_output_stack
 #
+def gru_layer(input_sequence, sequence_length, rnn_size, scope):
+    '''build bidirectional (concatenated output) lstm layer'''
+    
+    # Default activation is tanh
+    cell_fw = tf.contrib.rnn.GRUCell(rnn_size)
+    cell_bw = tf.contrib.rnn.GRUCell(rnn_size)
+    #
+    # tf.nn.rnn_cell.GRUCell(num_units, input_size=None, activation=<function tanh>).
+    # tf.contrib.rnn.GRUCell
+    #
+    # Include?
+    #cell_fw = tf.contrib.rnn.DropoutWrapper( cell_fw, 
+    #                                         input_keep_prob=dropout_rate )
+    #cell_bw = tf.contrib.rnn.DropoutWrapper( cell_bw, 
+    #                                         input_keep_prob=dropout_rate )
+    
+    rnn_output, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, input_sequence,
+                                                    sequence_length = sequence_length,
+                                                    time_major = True,
+                                                    dtype = tf.float32,
+                                                    scope = scope)
+    
+    # Concatenation allows a single output op because [A B]*[x;y] = Ax+By
+    # [ paddedSeqLen batchSize 2*rnn_size]
+    rnn_output_stack = tf.concat(rnn_output, 2, name = 'output_stack')
+    #rnn_output_stack = rnn_output[0] + rnn_output[1]
+    
+    return rnn_output_stack
+
+#
+#
+# model
 #
 def conv_feat_layers(inputs, width, mode):
     #
     training = (mode == learn.ModeKeys.TRAIN)
     #
-    layer_params = [ [  64, 3, (1,1), 'valid',  'conv1', False], 
-                     [  64, 3, (1,1), 'valid',  'conv2', True], # pool
-                     [ 128, 3, (1,1),  'same',  'conv3', False], 
-                     [ 128, 3, (1,1),  'same',  'conv4', True], # pool
-                     [ 256, 3, (1,1),  'same',  'conv5', False],
-                     [ 256, 3, (1,1),  'same',  'conv6', True], # hpool
-                     [ 512, 3, (1,1),  'same',  'conv7', False], 
-                     [ 512, 3, (1,1),  'same',  'conv8', True]] # hpool
+    layer_params = [ [  64, 3, (1,1),  'same',  'conv1', False], # pool
+                     [ 128, 3, (1,1),  'same',  'conv2', False], # pool
+                     [ 256, 3, (1,1),  'same',  'conv3', False],
+                     [ 256, 3, (1,1),  'same',  'conv4', False], # padding
+                     [ 512, 3, (1,1),  'same',  'conv5',  True], 
+                     [ 512, 3, (1,1),  'same',  'conv6',  True], 
+                     [ 512, 2, (1,1),  'same',  'conv7', False]] #
     #
-    # inputs should have shape [ ?, 32, ?, d]
+    # inputs should have shape [ batch, 32, width, channel]
     #
     with tf.variable_scope("conv_feat"): # h,w
         #
-        conv1 = conv_layer(inputs, layer_params[0], training ) # 30, w-2 
-        conv2 = conv_layer( conv1, layer_params[1], training ) # 28, w-4
-        pool2 = maxpool_layer(conv2, 2, 2, 'valid', 'pool2')   # 14, w//2-2
+        conv1 = conv_layer(inputs, layer_params[0], training ) # 32, w
+        padd1 = pad_layer(conv1, [[0,0],[0,0],[0,1],[0,0]], name='padd1')
+        pool1 = maxpool_layer(padd1, 2, 2, 'valid', 'pool1')   # 16, ceil(w/2)
         #
-        conv3 = conv_layer( pool2, layer_params[2], training ) # 14, w//2-2 #same
-        conv4 = conv_layer( conv3, layer_params[3], training ) # 14, w//2-2 #same
-        pool4 = maxpool_layer(conv4, 2, 2, 'valid', 'pool4' )  # 7, (w//2)//2-1
+        conv2 = conv_layer( pool1, layer_params[1], training ) # 16, ceil(w/2)
+        padd2 = pad_layer(conv2, [[0,0],[0,0],[0,1],[0,0]], name='padd2')
+        pool2 = maxpool_layer(padd2, 2, 2, 'valid', 'pool2' )  # 8, ceil(ceil(w/2)/2)
         #
-        conv5 = conv_layer( pool4, layer_params[4], training ) # 7, (w//2)//2-1 #same
-        conv6 = conv_layer( conv5, layer_params[5], training ) # 7, (w//2)//2-1 #same
-        pool6 = averpool_layer(conv6, [3,1], [2,1], 'valid', 'pool6')   # 3, (w//2)//2-1
+        conv3 = conv_layer( pool2, layer_params[2], training ) # 8, ceil(ceil(w/2)/2)
+        conv4 = conv_layer( conv3, layer_params[3], training ) # 8, ceil(ceil(w/2)/2)
+        padd3 = pad_layer(conv4, [[0,0],[0,0],[0,1],[0,0]], name='padd3')
+        pool3 = maxpool_layer(padd3, 2, 2, 'valid', 'pool3')   # 4, ceil(ceil(ceil(w/2)/2)/2)
         #
-        conv7 = conv_layer( pool6, layer_params[6], training ) # 3, (w//2)//2-1 #same
-        conv8 = conv_layer( conv7, layer_params[7], training ) # 3, (w//2)//2-1 #same
-        pool8 = averpool_layer(conv8, [3,1], [3,1], 'valid', 'pool8')    # 1, (w//2)//2-1
+        conv5 = conv_layer( pool3, layer_params[4], training ) # 4, ceil(ceil(ceil(w/2)/2)/2)    
+        conv6 = conv_layer( conv5, layer_params[5], training ) # 4, ceil(ceil(ceil(w/2)/2)/2)            
+        pool4 = maxpool_layer(conv6, [2,1], [2,1], 'valid', 'pool4')    # 2, ceil(ceil(ceil(w/2)/2)/2)
         #
-        features = tf.squeeze(pool8, axis = 1, name = 'features') # squeeze row dim
+        conv7 = conv_layer( pool4, layer_params[6], training ) # 2, ceil(ceil(ceil(w/2)/2)/2)
+        pool5 = maxpool_layer(conv7, [2,1], [2,1], 'valid', 'pool5')    # 1, ceil(ceil(ceil(w/2)/2)/2)
+        #
+        features = tf.squeeze(pool5, axis = 1, name = 'features') # squeeze row dim
         # tf.expand_dims()
         #
         #print(features.shape)
         #
         # Calculate resulting sequence length from original image widths
         #
-        one = tf.constant(1, dtype=tf.int32, name='one')
-        two = tf.constant(2, dtype=tf.int32, name='two')
+        two = tf.constant(2, dtype=tf.float32, name='two')
         #
-        w = tf.floor_div(width, two)
-        w = tf.floor_div(w, two)
-        w = tf.subtract(w, one)
-        
+        w = tf.cast(width, tf.float32)
+        #
+        w = tf.div(w, two)
+        w = tf.ceil(w)
+        #
+        w = tf.div(w, two)
+        w = tf.ceil(w)
+        #
+        w = tf.div(w, two)
+        w = tf.ceil(w)
+        #
+        w = tf.cast(w, tf.int32)
         #
         # Vectorize
         sequence_length = tf.reshape(w, [-1], name='seq_len') 
         #
-        
-        '''
-        kernel_sizes = [params[1] for params in layer_params]
-        
-        conv1_trim = tf.constant( 2 * (kernel_sizes[0] // 2),
-                                  dtype=tf.int32,
-                                  name='conv1_trim')
-        
-        one = tf.constant(1, dtype=tf.int32, name='one')
-        two = tf.constant(2, dtype=tf.int32, name='two')
-        
-        after_conv1 = tf.subtract( widths, conv1_trim)
-        after_pool2 = tf.floor_div( after_conv1, two )
-        after_pool4 = tf.subtract(after_pool2, one)
-        #
-        sequence_length = tf.reshape(after_pool4,[-1], name='seq_len') # Vectorize        
-        # pass '[-1]' to flatten ..
-        '''      
         
         #
         return features, sequence_length
@@ -253,7 +323,7 @@ def rnn_recog_layers(features, sequence_length, num_classes):
     #
     rnn_size = 512
     #
-    logit_activation = tf.nn.tanh
+    logit_activation = tf.nn.sigmoid
     #
     weight_initializer = tf.contrib.layers.variance_scaling_initializer()
     bias_initializer = tf.constant_initializer(value=0.0)

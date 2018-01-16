@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Tue Oct  3 12:50:37 2017
+
+@author: mingfan.li
+"""
 
 import os
 import shutil 
@@ -21,14 +26,17 @@ dir_images = dir_data + '/images'
 dir_contents = dir_data + '/contents'
 dir_results = dir_data + '/results'
 #
-str_dot_img_ext = '.PNG'
+str_dot_img_ext = '.png'
 #
-model_dir = './model'
-model_name = 'model_detect'
+
 #
-num_classes = 27 #
 #
-height_norm = 32
+model_dir = './model_recog'
+model_name = 'model_recog'
+#
+num_classes = 1 + len(model_recog_data.alphabet)
+#
+height_norm = 32 # 
 #
 
 #
