@@ -360,6 +360,17 @@ def ctc_loss_layer(sequence_labels, rnn_logits, sequence_length):
     return total_loss
     #
 #
+def decode_rnn_results_ctc_beam(results, width):
+    #
+    # tf.nn.ctc_beam_search_decoder
+    #
+    decoded, log_prob = tf.nn.ctc_beam_search_decoder(results, width, merge_repeated=False)
+    #
+    return decoded
+    #
+
+
+
 '''
 sequence_length: 1-D int32 vector, size [batch_size].The sequence lengths.
 '''
@@ -382,13 +393,13 @@ represents the dense tensor
 # labels.values[i] stores the id for (batch b, time t).
 # labels.values[i] must take on values in [0, num_labels).
 #
+# sparse_targets = sparse_tuple_from(targets)
+#
 def convert2SparseTensorValue(list_labels):
     #
     # list_labels: batch_major
     #
-    
-    #
-    #print(list_labels)
+   
     #
     num_samples = len(list_labels)
     num_maxlen = max(map(lambda x: len(x), list_labels))
@@ -408,4 +419,30 @@ def convert2SparseTensorValue(list_labels):
     return tf.SparseTensorValue(indices = indices, values = values, dense_shape = shape)
     #
 #
+def convert2ListLabels(sparse_tensor_value):
+    #
+    # list_labels: batch_major
+    #
+    
+    shape = sparse_tensor_value.dense_shape
+    indices = sparse_tensor_value.indices
+    values = sparse_tensor_value.values
+
+    
+    list_labels = []
+    #
+    item = [0]*shape[1]
+    for i in range(shape[0]): list_labels.append(item)
+    #
+    
+    for idx, value in enumerate(values):
+        #
+        posi = indices[idx]
+        #
+        list_labels[posi[0]][posi[1]] = value
+        #
+    
+    return list_labels
+    #
+
 

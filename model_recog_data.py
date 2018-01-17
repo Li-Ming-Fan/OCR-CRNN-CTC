@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 30 10:22:44 2017
+
+@author: mingfan.li
+"""
 
 import os
 
@@ -99,8 +104,8 @@ def getDataBatch(img_file, height_norm, batch_dir = './data_batch'):
     labels = []
     images = []
     #
-    # 将ASCII字符转换为对应的数值，即‘a’-->97，使用ord函数,ord('a')
-    # 反之，使用chr函数，将数值转换为对应的ASCII字符，chr(97)
+    
+    
     #
     chosen = random.choice(range(len(content_list)))
     #
@@ -137,20 +142,12 @@ def getDataBatch(img_file, height_norm, batch_dir = './data_batch'):
     #
     
     '''
+    
     width_list = []
     #
     for item in content_list:
         #
-        list_chars = list(map(lambda x: ord(x)-97, item[1]))
-        #        
-        # len norm
-        #d = len_str_max - len(list_chars)
-        #if d: list_chars.extend([0] * d)
-        #
-        # one-hot encoder
-        # list_onehot = [np.eye(27)[x] for x in list_chars]
-        # labels.append((np.array(list_onehot)).tolist())
-        #
+        list_chars = list(map(mapChar2Order, item[1]))
         #print(list_chars)
         labels.append(list_chars)
         #
@@ -169,8 +166,6 @@ def getDataBatch(img_file, height_norm, batch_dir = './data_batch'):
     #
     # norm width
     width_max = max(width_list)
-    #
-    if not os.path.exists(batch_dir): os.mkdir(batch_dir)
     #
     for i in range(len(width_list)):
         #
@@ -199,8 +194,13 @@ def getDataBatch(img_file, height_norm, batch_dir = './data_batch'):
     #    
     #return labels, images
     return labels, np.array(images), width_max, len(content_list)
+    
     '''
+    
     #
+#
+
+'''
 #
 def transResultsRNN(results):
     #
@@ -223,5 +223,5 @@ def transResultsRNN(results):
     return np.array(trans)
     #
 
-
+'''
 

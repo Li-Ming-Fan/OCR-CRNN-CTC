@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Created on Tue Oct  3 12:50:37 2017
+
+@author: mingfan.li
+"""
 
 import os
 import shutil 
@@ -62,6 +67,7 @@ features, sequence_length = model_recog.conv_feat_layers(x, w, learn.ModeKeys.TR
 result_logits = model_recog.rnn_recog_layers(features, sequence_length, num_classes)
 #
 loss = model_recog.ctc_loss_layer(yT, result_logits, sequence_length)
+result_decoded = model_recog.decode_rnn_results_ctc_beam(result_logits, sequence_length)
 #
 # train-related
 global_step = tf.train.get_or_create_global_step()
@@ -180,19 +186,17 @@ with tf.Session() as sess:
                 w_arr = np.ones((batch,), dtype = np.int32) * width
                 #
                 feed_dict = {x: images, yT: tsv, w: w_arr}
-                results, loss_value = sess.run([result_logits, loss], feed_dict)
+                results, loss_value, decoded = sess.run([result_logits, loss, result_decoded], feed_dict)
                 #
                 curr += 1
                 print('curr: %d / %d, loss: %f' % (curr, NumImages, loss_value))
                 #
-                
-                print(results)
-                
-
-                
+                #print(targets)               
+                #print(results)
+                #print(decoded)
                 #
-                trans = model_recog_data.transResultsRNN(results)
-                #
+                trans = model_recog.convert2ListLabels(decoded[0])
+                #            
                 #print(trans)
                 #
                 filename = os.path.basename(img_file)
@@ -204,7 +208,12 @@ with tf.Session() as sess:
                         seq = list(map(model_recog_data.mapOrder2Char, label))
                         print(''.join(seq))
                         fp.write(''.join(seq) + '\n')
-                    for seq in trans: fp.write(seq + '\n')
+                    
+                    for item in trans:
+                        seq = list(map(model_recog_data.mapOrder2Char, item))
+                        print(''.join(seq))
+                        fp.write(''.join(seq) + '\n')
+                #
                 # image
                 r = Image.fromarray(images[0][:,:,0] *255).convert('L')
                 g = Image.fromarray(images[0][:,:,1] *255).convert('L')
