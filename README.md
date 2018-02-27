@@ -12,9 +12,7 @@ To run this repo:
 2, python data_generator.py 1     &nbsp; &nbsp; &nbsp;    # to generate training data
   
 3, python script_recog.py      &nbsp; &nbsp; &nbsp;     # to train and validate
-
-
-note: still working on
+  
 
 
 ### recognition model
