@@ -8,7 +8,9 @@ cnn + lstm/gru + ctc (CRNN) for image text recognition
 To run this repo:
 
 1, python data_generator.py 0     &nbsp; &nbsp; &nbsp;     # to generate validation data
+  
 2, python data_generator.py 1     &nbsp; &nbsp; &nbsp;    # to generate training data
+  
 3, python script_recog.py      &nbsp; &nbsp; &nbsp;     # to train and validate
 
 
