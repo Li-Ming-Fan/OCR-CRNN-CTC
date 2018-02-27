@@ -18,7 +18,7 @@ import sys
 #
 # change this value to change the default purpose of data-generating
 #
-data_for_training = 1                # 1 for training, 0 for test  
+data_for_training = 0                # 1 for training, 0 for test  
 # 
 
 
