@@ -2,6 +2,11 @@
 
 cnn + lstm/gru + ctc (CRNN) for image text recognition
 
+
+### example results
+ 
+![aaa_recog_test_results](https://github.com/Li-Ming-Fan/OCR-CRNN-CTC/blob/master/aaa_recog_test_results/test_results.JPG?raw=true)
+  
   
 ### decription
   
