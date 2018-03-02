@@ -20,7 +20,7 @@ To run this repo:
   
 
 
-### recognition model
+### reference
 
 The model is mainly based on the method described in the article:
   
