@@ -31,6 +31,7 @@ Baoguang Shi, Xiang Bai, Cong Yao
 https://arxiv.org/abs/1507.05717
   
   
+</br>
   
 We thank Jerod Weinman for make his code available: https://github.com/weinman/cnn_lstm_ctc_ocr
 
