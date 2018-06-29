@@ -18,6 +18,8 @@ To run this repo:
   
 3, python script_recog.py      &nbsp; &nbsp; &nbsp;     # to train and validate
   
+  
+This is branch: fixed_len, fixed-length.
 
 
 ### reference
