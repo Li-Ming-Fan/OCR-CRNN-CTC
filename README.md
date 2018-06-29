@@ -25,8 +25,7 @@ To run this repo:
   
 5, python script_recog.py      &nbsp; &nbsp; &nbsp;     # to train and validate
   
-  
-  
+</br>
 
 By 1 and 2, images with texts will be generated with images in images_base as background. The images will be saved in a newly-maked folders: ./data_train and ./data_valid.
 
