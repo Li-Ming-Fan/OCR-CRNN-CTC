@@ -33,10 +33,10 @@ if len(sys.argv) >= 2:
 #
 if data_for_training > 0:
     dir_data_generated = './data_train'
-    NumPerImage = 2
+    NumPerImage = 200
 else:
     dir_data_generated = './data_valid'
-    NumPerImage = 1
+    NumPerImage = 10
 #
 
 
