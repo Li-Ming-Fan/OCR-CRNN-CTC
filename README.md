@@ -4,8 +4,11 @@ cnn + lstm/gru + ctc (CRNN) for image text recognition
 
 
 ### example results
+  
+  
+test results after training 300 steps:
  
-![aaa_recog_test_results](https://github.com/Li-Ming-Fan/OCR-CRNN-CTC/blob/master/aaa_recog_test_results/test_results.JPG?raw=true)
+![aaa_recog_test_results](https://github.com/Li-Ming-Fan/OCR-CRNN-CTC/blob/master/aaa_recog_test_results/recog_results_300.PNG?raw=true)
   
   
 ### decription
@@ -21,7 +24,9 @@ To run this repo:
 4, python data_rects_extrator.py 1     &nbsp; &nbsp; &nbsp;    # to generate training data
   
 5, python script_recog.py      &nbsp; &nbsp; &nbsp;     # to train and validate
-
+  
+  
+  
 
 By 1 and 2, images with texts will be generated with images in images_base as background. The images will be saved in a newly-maked folders: ./data_train and ./data_valid.
 
