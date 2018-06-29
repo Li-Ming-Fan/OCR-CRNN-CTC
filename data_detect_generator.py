@@ -41,15 +41,10 @@ else:
 
 
 #
-list_fonts = ['fonts/arial.ttf',
-              'fonts/arialbd.ttf',
-              'fonts/ariali.ttf',
-              'fonts/ariblk.ttf',
-              'fonts/courbd.ttf',
-              'fonts/courbi.ttf',
-              'fonts/times.ttf',
-              'fonts/timesbd.ttf',
-              'fonts/verdana.ttf',
+list_fonts = [#'C:\Windows\Fonts\Arial.ttf',
+              #'C:\Windows\Fonts\Arialbd.ttf',
+              #'C:\Windows\Fonts\courbd.ttf',
+              #'C:\Windows\Fonts\courbi.ttf',
               #'C:\Windows\Fonts\CENTAUR.TTF',
               #'C:\Windows\Fonts\BASKVILL.TTF',
               'fonts/tecnico_bold.ttf',
