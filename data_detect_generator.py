@@ -49,9 +49,7 @@ list_fonts = [#'C:\Windows\Fonts\Arial.ttf',
               #'C:\Windows\Fonts\BASKVILL.TTF',
               'fonts/tecnico_bold.ttf',
               'fonts/tecnico_bolditalic.ttf',
-              'fonts/tecnico_regular.ttf',
-              'fonts/AnisaSans.ttf',
-              'fonts/SEA_GARDENS.ttf']
+              'fonts/tecnico_regular.ttf']
 #
 
 #
