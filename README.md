@@ -19,9 +19,9 @@ To run this repo:
   
 2, python data_detect_generator.py 1     &nbsp; &nbsp; &nbsp;    # to generate training images for detection
   
-3, python data_rects_extrator.py 0     &nbsp; &nbsp; &nbsp;     # to generate validation data-rects for recognition
+3, python data_rects_extractor.py 0     &nbsp; &nbsp; &nbsp;     # to generate validation data-rects for recognition
   
-4, python data_rects_extrator.py 1     &nbsp; &nbsp; &nbsp;    # to generate training data
+4, python data_rects_extractor.py 1     &nbsp; &nbsp; &nbsp;    # to generate training data-rects for recognition
   
 5, python script_recog.py      &nbsp; &nbsp; &nbsp;     # to train and validate
   
