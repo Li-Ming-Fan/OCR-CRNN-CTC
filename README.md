@@ -8,7 +8,7 @@ cnn + lstm/gru + ctc (CRNN) for image text recognition
   
 test results after training 300 steps:
  
-![aaa_recog_test_results](https://github.com/Li-Ming-Fan/OCR-CRNN-CTC/blob/master/aaa_recog_test_results/recog_results_300.PNG?raw=true)
+![recog_test_results](https://github.com/Li-Ming-Fan/OCR-CRNN-CTC/blob/master/aaa_recog_test_results/result_300.PNG?raw=true)
   
   
 ### decription
